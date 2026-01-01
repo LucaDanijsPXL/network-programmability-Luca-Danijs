@@ -226,3 +226,35 @@ Voorbeeld: een YANG-model kan specificeren dat een interface een naam, type en I
 ![alt text](afbeeldingen/image-28.png)
 
 ![alt text](afbeeldingen/image-29.png)
+
+## Important findings
+Deze methode is makkelijk te gebruiken om configuraties te maken en editen. python scripts + het gebruik van AI maakt het makkelijk snel.
+
+# 🧰 Part 6
+
+## Screenshots
+![alt text](afbeeldingen/image-30.png)
+
+![alt text](afbeeldingen/image-31.png)
+
+![alt text](afbeeldingen/image-32.png)
+
+![alt text](afbeeldingen/image-33.png)
+
+![alt text](afbeeldingen/image-34.png)
+
+![alt text](afbeeldingen/image-35.png)
+
+![alt text](afbeeldingen/image-36.png)
+
+![alt text](afbeeldingen/image-37.png)
+
+![alt text](afbeeldingen/image-38.png)
+
+![alt text](afbeeldingen/image-39.png)
+
+![alt text](afbeeldingen/image-40.png)
+
+## Findings
+
+Het gebruik maken van API is wel gemakkelijk maar wat er gebruikt is in part 5 is gemakkelijker en beter automatiseerbaar maal wel slechter leesbaar. Beide methodes zijn goed en makkelijk te gebruiken
