@@ -220,3 +220,9 @@ Voorbeeld: een YANG-model kan specificeren dat een interface een naam, type en I
 ![alt text](afbeeldingen/image-25.png)
 
 ![alt text](afbeeldingen/image-26.png)
+
+![alt text](afbeeldingen/image-27.png)
+
+![alt text](afbeeldingen/image-28.png)
+
+![alt text](afbeeldingen/image-29.png)
