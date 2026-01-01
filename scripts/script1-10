@@ -1,0 +1,108 @@
+device1 = {
+    "device_type": "cisco_ios",
+    "host": "192.168.56.101",
+    "username": "cisco",
+    "password": "cisco123!",
+}
+
+device2 = {
+    "device_type": "cisco_ios",
+    "host": "192.168.56.101",
+    "username": "cisco",
+    "password": "cisco123!",
+}
+
+
+#1 Send SHOW Command to a Single Device
+from netmiko import ConnectHandler
+
+net = ConnectHandler(**device1)
+output = net.send_command("show ip interface brief")
+print(output)
+net.disconnect()
+
+#2 Send CONFIG Command to a Single Device
+net = ConnectHandler(**device1)
+
+config_commands = [
+    "interface loopback100",
+    "ip address 100.100.100.1 255.255.255.255",
+    "description Configured_by_Netmiko"
+]
+
+net.send_config_set(config_commands)
+net.disconnect()
+
+#3 Run SHOW and Save Output to File
+net = ConnectHandler(**device1)
+output = net.send_command("show version")
+
+with open("show_version.txt", "w") as f:
+    f.write(output)
+
+net.disconnect()
+
+#4 Backup Device Configuration
+net = ConnectHandler(**device1)
+backup = net.send_command("show running-config")
+
+with open("router_backup.cfg", "w") as f:
+    f.write(backup)
+
+net.disconnect()
+
+#5 Send Configuration from External File
+net = ConnectHandler(**device1)
+net.send_config_from_file("config.txt")
+net.disconnect()
+
+#6 Configure Subset of Interfaces
+interfaces = ["GigabitEthernet1", "GigabitEthernet2"]
+
+net = ConnectHandler(**device1)
+
+for intf in interfaces:
+    net.send_config_set([
+        f"interface {intf}",
+        "description Configured_by_Script",
+        "no shutdown"
+    ])
+
+net.disconnect()
+
+#7 Script Using Functions
+def backup_device(net):
+    config = net.send_command("show run")
+    with open("backup.cfg", "w") as f:
+        f.write(config)
+
+net = ConnectHandler(**device1)
+backup_device(net)
+net.disconnect()
+
+
+#8 Conditional Statements
+net = ConnectHandler(**device1)
+version = net.send_command("show version")
+
+if "IOS-XE" in version:
+    print("IOS-XE Device Detected")
+else:
+    print("Unknown Device")
+
+net.disconnect()
+
+
+#9 Multiple Devices — SHOW Commands
+devices = [device1, device2]
+
+for device in devices:
+    net = ConnectHandler(**device)
+    print(net.send_command("show ip route"))
+    net.disconnect()
+
+#10 Multiple Devices — CONFIG Commands
+for device in devices:
+    net = ConnectHandler(**device)
+    net.send_config_set(["ntp server 10.10.10.10"])
+    net.disconnect()
