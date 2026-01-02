@@ -1,5 +1,5 @@
 {
-  "Cisco-IOS-XE-native:native": {
+  "native": {
     "hostname": "R1",
     "interface": {
       "GigabitEthernet": [
@@ -18,8 +18,8 @@
       ]
     }
   },
-  "Cisco-IOS-XE-ospf:ospf": {
-    "process-id": [
+  "ospf": {
+    "ospf-process": [
       {
         "id": 1,
         "network": [
