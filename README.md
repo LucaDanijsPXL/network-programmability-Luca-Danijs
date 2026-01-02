@@ -267,6 +267,8 @@ Url van OSPF werkte meerdere keren niet zat een fout in.
 
 Bij aanpassen eerst van Interface gigtabit 1 veranderde ik het IP waardoor ping en ssh niet meer werkte. Dit heeft mij enorm lang geduurd om uit te vogelen.
 
+Github op public moeten zetten zodat de Single source of truth kan bereikt worden.
+
 
 ## Screenshots
 ![alt text](afbeeldingen/image-41.png)
