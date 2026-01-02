@@ -265,6 +265,10 @@ Het gebruik maken van API is wel gemakkelijk maar wat er gebruikt is in part 5 i
 
 Url van OSPF werkte meerdere keren niet zat een fout in.
 
+Bij aanpassen eerst van Interface gigtabit 1 veranderde ik het IP waardoor ping en ssh niet meer werkte. Dit heeft mij enorm lang geduurd om uit te vogelen.
+
+
+## Screenshots
 ![alt text](afbeeldingen/image-41.png)
 
 ## Script endpoints:
