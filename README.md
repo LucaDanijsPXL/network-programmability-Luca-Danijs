@@ -258,3 +258,49 @@ Deze methode is makkelijk te gebruiken om configuraties te maken en editen. pyth
 ## Findings
 
 Het gebruik maken van API is wel gemakkelijk maar wat er gebruikt is in part 5 is gemakkelijker en beter automatiseerbaar maal wel slechter leesbaar. Beide methodes zijn goed en makkelijk te gebruiken
+
+# LAB 4 TASK 38
+
+## Roadblocks
+
+Url van OSPF werkte meerdere keren niet zat een fout in.
+
+![alt text](afbeeldingen/image-41.png)
+
+## Script endpoints:
+```bash
+Hostname:
+  PUT  /data/Cisco-IOS-XE-native:native/hostname
+
+Interfaces:
+  GET  /data/ietf-interfaces:interfaces
+  PUT  /data/ietf-interfaces:interfaces/interface={name}
+
+OSPF:
+  GET  /data/.../router/Cisco-IOS-XE-ospf:ospf
+  PUT  /data/.../router/Cisco-IOS-XE-ospf:ospf={id}
+  ```
+
+## Script Artchitectuur
+
+```bash
+┌─────────────┐
+│   GitHub    │  ← Single Source of Truth
+│(config.json)│
+└──────┬──────┘
+       │ HTTP GET
+       ↓
+┌─────────────────┐
+│  Python Script  │
+│ restconf-lab4.py│
+└──────┬──────────┘
+       │ RESTCONF PUT/PATCH
+       │ (HTTPS over port 443)
+       ↓
+┌─────────────────┐
+│  Cisco IOS-XE   │
+│   CSR1000v      │
+│ (192.168.56.101)│
+└─────────────────┘
+```
+

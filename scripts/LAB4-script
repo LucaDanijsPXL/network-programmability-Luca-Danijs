@@ -1,46 +1,239 @@
+#!/usr/bin/env python3
+"""
+RESTCONF Automation - Configuratie van GitHub naar Cisco IOS-XE
+"""
+
 import requests
+import json
 import logging
-from requests.auth import HTTPBasicAuth
 
-# ---------- CONFIG ----------
-DEVICE = "https://192.168.56.101"
-USERNAME = "cisco"
-PASSWORD = "cisco123!"
-GITHUB_RAW_URL = "https://raw.githubusercontent.com/LucaDanijsPXL/network-programmability-Luca-Danijs/refs/heads/main/scripts/config-lab4.json"
-# ---------------------------
+# Disable SSL warnings
+requests.packages.urllib3.disable_warnings()
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
+# Logging setup
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-headers = {
-    "Accept": "application/yang-data+json",
-    "Content-Type": "application/yang-data+json"
+
+# === CONFIGURATIE ===
+DEVICE = {
+    "host": "192.168.56.101",
+    "username": "cisco",
+    "password": "cisco123!",
+    "port": 443  # Pas aan naar 9443 of andere poort indien nodig
 }
 
-def get_config_from_github():
-    r = requests.get(GITHUB_RAW_URL)
-    if r.status_code != 200:
-        logging.error("Failed to fetch config from GitHub")
-        exit(1)
-    return r.json()
+GITHUB_URL = "https://raw.githubusercontent.com/LucaDanijsPXL/network-programmability-Luca-Danijs/refs/heads/main/scripts/lab4-config.json"
 
-def push_config(config):
-    url = f"{DEVICE}/restconf/data/Cisco-IOS-XE-native:native"
-    r = requests.patch(
-        url,
-        json=config,
-        headers=headers,
-        auth=HTTPBasicAuth(USERNAME, PASSWORD),
-        verify=False
-    )
+# === FUNCTIES ===
 
-    if r.status_code in [200, 201, 204]:
-        logging.info("Configuration successfully applied")
+def get_config_from_github(url):
+    """Haal configuratie op uit GitHub"""
+    logger.info("Ophalen configuratie uit GitHub...")
+    try:
+        response = requests.get(url, timeout=30)
+        if response.status_code == 200:
+            logger.info("✓ Configuratie opgehaald")
+            return response.json()
+        else:
+            logger.error(f"✗ GitHub fout: {response.status_code}")
+            return None
+    except Exception as e:
+        logger.error(f"✗ Fout: {e}")
+        return None
+
+
+def configure_hostname(hostname):
+    """Configureer hostname via RESTCONF"""
+    logger.info(f"Configureren hostname: {hostname}")
+    
+    api_url = f"https://{DEVICE['host']}:{DEVICE['port']}/restconf/data/Cisco-IOS-XE-native:native/hostname"
+    headers = {
+        "Accept": "application/yang-data+json",
+        "Content-type": "application/yang-data+json"
+    }
+    basicauth = (DEVICE['username'], DEVICE['password'])
+    
+    yangConfig = {
+        "Cisco-IOS-XE-native:hostname": hostname
+    }
+    
+    try:
+        resp = requests.put(api_url, data=json.dumps(yangConfig), auth=basicauth, 
+                          headers=headers, verify=False, timeout=30)
+        
+        if resp.status_code >= 200 and resp.status_code <= 299:
+            logger.info(f"✓ STATUS OK: {resp.status_code}")
+            return True
+        else:
+            logger.error(f"✗ Error. Status Code: {resp.status_code}")
+            logger.error(f"Error message: {resp.json()}")
+            return False
+    except Exception as e:
+        logger.error(f"✗ Request fout: {e}")
+        return False
+
+
+def configure_interface(interface):
+    """Configureer interface via RESTCONF"""
+    name = interface['name']
+    logger.info(f"Configureren interface: {name}")
+    
+    api_url = f"https://{DEVICE['host']}:{DEVICE['port']}/restconf/data/ietf-interfaces:interfaces/interface={name}"
+    headers = {
+        "Accept": "application/yang-data+json",
+        "Content-type": "application/yang-data+json"
+    }
+    basicauth = (DEVICE['username'], DEVICE['password'])
+    
+    # Bepaal interface type
+    if 'Loopback' in name:
+        iface_type = "iana-if-type:softwareLoopback"
+    elif 'GigabitEthernet' in name:
+        iface_type = "iana-if-type:ethernetCsmacd"
     else:
-        logging.error(f"Failed to apply config: {r.status_code} {r.text}")
+        iface_type = "iana-if-type:ethernetCsmacd"
+    
+    yangConfig = {
+        "ietf-interfaces:interface": {
+            "name": name,
+            "type": iface_type,
+            "enabled": True,
+            "ietf-ip:ipv4": {
+                "address": [
+                    {
+                        "ip": interface['ip_address'],
+                        "netmask": interface['subnet_mask']
+                    }
+                ]
+            }
+        }
+    }
+    
+    # Voeg description toe als die bestaat
+    if 'description' in interface and interface['description']:
+        yangConfig["ietf-interfaces:interface"]["description"] = interface['description']
+    
+    try:
+        resp = requests.put(api_url, data=json.dumps(yangConfig), auth=basicauth,
+                          headers=headers, verify=False, timeout=30)
+        
+        if resp.status_code >= 200 and resp.status_code <= 299:
+            logger.info(f"✓ STATUS OK: {resp.status_code}")
+            return True
+        else:
+            logger.error(f"✗ Error. Status Code: {resp.status_code}")
+            try:
+                logger.error(f"Error message: {resp.json()}")
+            except:
+                logger.error(f"Error message: {resp.text}")
+            return False
+    except Exception as e:
+        logger.error(f"✗ Request fout: {e}")
+        return False
+
+
+def configure_ospf(ospf_config):
+    """Configureer OSPF via RESTCONF"""
+    process_id = ospf_config['process_id']
+    logger.info(f"Configureren OSPF proces {process_id}")
+    
+    # Gebruik het specifieke proces endpoint
+    api_url = f"https://{DEVICE['host']}:{DEVICE['port']}/restconf/data/Cisco-IOS-XE-native:native/router/Cisco-IOS-XE-ospf:ospf={process_id}"
+    headers = {
+        "Accept": "application/yang-data+json",
+        "Content-type": "application/yang-data+json"
+    }
+    basicauth = (DEVICE['username'], DEVICE['password'])
+    
+    networks = []
+    for net in ospf_config['networks']:
+        networks.append({
+            "ip": net['network'],
+            "mask": net['wildcard'],  # OSPF gebruikt 'mask' in plaats van 'wildcard'
+            "area": net['area']
+        })
+    
+    yangConfig = {
+        "Cisco-IOS-XE-ospf:ospf": {
+            "id": process_id,
+            "router-id": ospf_config['router_id'],
+            "network": networks
+        }
+    }
+    
+    try:
+        resp = requests.put(api_url, data=json.dumps(yangConfig), auth=basicauth,
+                          headers=headers, verify=False, timeout=30)
+        
+        if resp.status_code >= 200 and resp.status_code <= 299:
+            logger.info(f"✓ STATUS OK: {resp.status_code}")
+            return True
+        else:
+            logger.error(f"✗ Error. Status Code: {resp.status_code}")
+            try:
+                logger.error(f"Error message: {resp.json()}")
+            except:
+                logger.error(f"Error message: {resp.text}")
+            return False
+    except Exception as e:
+        logger.error(f"✗ Request fout: {e}")
+        return False
+
+
+def verify_config():
+    """Verificatie van configuratie"""
+    logger.info("=== Verificatie ===")
+    
+    api_url = f"https://{DEVICE['host']}:{DEVICE['port']}/restconf/data/Cisco-IOS-XE-native:native/hostname"
+    headers = {"Accept": "application/yang-data+json"}
+    basicauth = (DEVICE['username'], DEVICE['password'])
+    
+    try:
+        resp = requests.get(api_url, auth=basicauth, headers=headers, verify=False, timeout=30)
+        if resp.status_code >= 200 and resp.status_code <= 299:
+            data = resp.json()
+            hostname = data.get("Cisco-IOS-XE-native:hostname", "Onbekend")
+            logger.info(f"Hostname: {hostname}")
+    except Exception as e:
+        logger.error(f"Verificatie fout: {e}")
+
 
 def main():
-    config = get_config_from_github()
-    push_config(config)
+    """Hoofdfunctie"""
+    logger.info("=== RESTCONF Automatisering Start ===")
+    
+    # Stap 1: Haal configuratie op uit GitHub
+    config = get_config_from_github(GITHUB_URL)
+    if not config:
+        logger.error("Kan configuratie niet ophalen. Stoppen.")
+        return
+    
+    # Stap 2: Pas configuratie toe
+    results = []
+    
+    # Hostname
+    if 'hostname' in config:
+        results.append(configure_hostname(config['hostname']))
+    
+    # Interfaces
+    if 'interfaces' in config:
+        for interface in config['interfaces']:
+            results.append(configure_interface(interface))
+    
+    # OSPF
+    if 'ospf' in config:
+        results.append(configure_ospf(config['ospf']))
+    
+    # Resultaat
+    success = sum(results)
+    total = len(results)
+    logger.info(f"=== Resultaat: {success}/{total} succesvol ===")
+    
+    # Verificatie
+    if success > 0:
+        verify_config()
+
 
 if __name__ == "__main__":
     main()
