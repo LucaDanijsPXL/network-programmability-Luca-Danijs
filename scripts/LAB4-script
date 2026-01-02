@@ -1,0 +1,46 @@
+import requests
+import logging
+from requests.auth import HTTPBasicAuth
+
+# ---------- CONFIG ----------
+DEVICE = "https://10.0.0.10"
+USERNAME = "admin"
+PASSWORD = "cisco"
+GITHUB_RAW_URL = "https://raw.githubusercontent.com/USER/REPO/main/config.json"
+# ---------------------------
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
+
+headers = {
+    "Accept": "application/yang-data+json",
+    "Content-Type": "application/yang-data+json"
+}
+
+def get_config_from_github():
+    r = requests.get(GITHUB_RAW_URL)
+    if r.status_code != 200:
+        logging.error("Failed to fetch config from GitHub")
+        exit(1)
+    return r.json()
+
+def push_config(config):
+    url = f"{DEVICE}/restconf/data/Cisco-IOS-XE-native:native"
+    r = requests.patch(
+        url,
+        json=config,
+        headers=headers,
+        auth=HTTPBasicAuth(USERNAME, PASSWORD),
+        verify=False
+    )
+
+    if r.status_code in [200, 201, 204]:
+        logging.info("Configuration successfully applied")
+    else:
+        logging.error(f"Failed to apply config: {r.status_code} {r.text}")
+
+def main():
+    config = get_config_from_github()
+    push_config(config)
+
+if __name__ == "__main__":
+    main()
