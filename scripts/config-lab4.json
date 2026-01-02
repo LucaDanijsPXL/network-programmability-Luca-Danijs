@@ -17,8 +17,8 @@
       ]
     },
     "router": {
-      "ospf": {
-        "ospf-process": [
+      "router-ospf": {
+        "ospf": [
           {
             "id": 1,
             "network": [
