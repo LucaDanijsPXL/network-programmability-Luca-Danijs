@@ -314,3 +314,7 @@ OSPF:
 └─────────────────┘
 ```
 
+## Verification
+Het script output errors
+
+In Router zelf kan er gekeken worden of het correct uitgevoerd is.
