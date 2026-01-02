@@ -2,13 +2,13 @@
   "hostname": "Router-01",
   "interfaces": [
     {
-      "name": "GigabitEthernet5",
+      "name": "GigabitEthernet3",
       "ip_address": "10.0.1.1",
       "subnet_mask": "255.255.255.0",
       "description": "LAN Interface"
     },
     {
-      "name": "GigabitEthernet6",
+      "name": "GigabitEthernet2",
       "ip_address": "10.0.2.1",
       "subnet_mask": "255.255.255.0",
       "description": "WAN Interface"
