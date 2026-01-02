@@ -261,6 +261,9 @@ Het gebruik maken van API is wel gemakkelijk maar wat er gebruikt is in part 5 i
 
 # 🧰 LAB 4 TASK 38
 
+Script: scripts/LAB4-Script.py
+Config: lab4-config.json
+
 ## Roadblocks
 
 Url van OSPF werkte meerdere keren niet zat een fout in.
