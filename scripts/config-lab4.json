@@ -1,5 +1,5 @@
 {
-  "native": {
+  "Cisco-IOS-XE-native:native": {
     "hostname": "R1",
     "interface": {
       "GigabitEthernet": [
@@ -16,20 +16,22 @@
           }
         }
       ]
-    }
-  },
-  "ospf": {
-    "ospf-process": [
-      {
-        "id": 1,
-        "network": [
+    },
+    "router": {
+      "router-ospf": {
+        "ospf": [
           {
-            "ip": "10.0.0.0",
-            "wildcard": "0.0.0.255",
-            "area": 0
+            "id": 1,
+            "network": [
+              {
+                "ip": "10.0.0.0",
+                "wildcard": "0.0.0.255",
+                "area": 0
+              }
+            ]
           }
         ]
       }
-    ]
+    }
   }
 }
