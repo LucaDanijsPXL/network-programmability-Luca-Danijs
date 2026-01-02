@@ -2,22 +2,22 @@
   "hostname": "Router-01",
   "interfaces": [
     {
-      "name": "GigabitEthernet3",
-      "ip_address": "10.0.1.1",
-      "subnet_mask": "255.255.255.0",
-      "description": "LAN Interface"
-    },
-    {
-      "name": "GigabitEthernet2",
-      "ip_address": "10.0.2.1",
-      "subnet_mask": "255.255.255.0",
-      "description": "WAN Interface"
-    },
-    {
       "name": "Loopback44",
       "ip_address": "1.1.1.1",
       "subnet_mask": "255.255.255.255",
       "description": "OSPF Router ID"
+    },
+    {
+      "name": "Loopback45",
+      "ip_address": "10.0.1.1",
+      "subnet_mask": "255.255.255.0",
+      "description": "LAN Network"
+    },
+    {
+      "name": "Loopback46",
+      "ip_address": "10.0.2.1",
+      "subnet_mask": "255.255.255.0",
+      "description": "WAN Network"
     }
   ],
   "ospf": {
